@@ -1,0 +1,31 @@
+h1{ text-align: center }
+form{
+    padding: 15px;
+}
+form div.row{
+    width: 50%;
+    margin: auto;
+    margin-bottom: 10px;
+}
+form label{
+    width: 30%;
+    text-align: end;
+    display: block;
+    float: left;
+    margin-right: 20px;
+}
+form input, form select, form textarea{
+    padding: 5px;
+    border-radius: 5px;
+    width: 200px;
+}
+form input[type="submit"]{
+    width: 100px;
+    background: indigo;
+    border: none;
+    color: cornsilk;
+    cursor: pointer;
+}
+form div.row:last-of-type{
+    text-align: -moz-center;
+}
