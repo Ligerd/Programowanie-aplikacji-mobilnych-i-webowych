@@ -2,46 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Projekt</title>
+    <title> Signup form</title>
     <link rel="stylesheet" href="style.css">
+    <link href="http://fonts.googleapis.com/css?family=Nunito:400,300" rel="stylesheet" type="text/css">
 </head>
 <body>
-<h1>Rejestracja</h1>
-<div class="content">
-    <section>
-        <form action="#" method="post" autocomplete="off">
-            <div class="row">
-                <label for="name">Imie</label>
-                <input id="name" type="text" required autofocus="true">
-            </div>
-            <div class="row">
-                <label id="secondname">Nazwisko</label>
-                <input id="secondname" type="text" required autofocus="true">
-            </div>
-            <div class="row">
-                <label for="email">Adres e-mail</label>
-                <input id="email" type="email" required>
-            </div>
-            <div class="row">
-                <label for="password">Hasło</label>
-                <input id="password" type="password" required>
-            </div>
-            <div class="row">
-                <label for="date">Data urodzenia</label>
-                <input id="date" type="date">
-            </div>
-            <div class="row">
-                <label for="gender">Płeć</label>
-                <select id="gender">
-                    <option>Mężczyzna</option>
-                    <option>Kobieta</option>
-                </select>
-            </div>
-            <div class="row">
-                <input type="submit" value="Submit">
-            </div>
-        </form>
-    </section>
-</div>
+<form action="" method="post">
+    <h1>Sign form</h1>
+    <fieldset>
+        <legend><span class="section">1</span> Your Basic Info </legend>
+
+      <label class="" for="name">Name</label>
+      <input type="text" name="name" value="">
+
+      <label class="" for="email">Email</label>
+      <input type="email" name="email" value="">
+
+      <label class="" for="password">Password</label>
+      <input type="password" name="password" value="">
+
+      <label>Age:</label>
+      <input type="radio" name="age" value="under_18">
+      <label class="light" for="under_18">Under 18</label>
+
+      <input type="radio" name="age" value="over_18">
+      <label class="light" for="over_18">Over 18</label>
+
+    </fieldset>
+    <fieldset>
+        <legend><span class="section">2</span> Your Profile </legend>
+        <label class="" for="bio">Bio:</label>
+        <textarea name="bio"></textarea>
+    </fieldset>
+    <button type="submit">Sing up</button>
+</form>
 </body>
 </html>
