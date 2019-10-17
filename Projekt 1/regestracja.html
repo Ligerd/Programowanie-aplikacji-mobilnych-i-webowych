@@ -7,32 +7,36 @@
     <link href="http://fonts.googleapis.com/css?family=Nunito:400,300" rel="stylesheet" type="text/css">
 </head>
 <body>
-<form action="" method="post">
+<form action="" method="">
     <h1>Sign form</h1>
     <fieldset>
         <legend><span class="section">1</span> Your Basic Info </legend>
 
-      <label class="" for="name">Name</label>
-      <input type="text" name="name" value="">
+      <label class="" for="name">Imie i nazwisko</label>
+      <input type="text" name="name" value="" required autofocus="true">
 
-      <label class="" for="email">Email</label>
-      <input type="email" name="email" value="">
+        <label class="" for="password">Hasło</label>
+        <input type="password" name="password" value="" required>
 
-      <label class="" for="password">Password</label>
-      <input type="password" name="password" value="">
+        <label class="" for="password2">Powtóż hasło</label>
+        <input type="password" name="password2" value="" required>
 
-      <label>Age:</label>
-      <input type="radio" name="age" value="under_18">
-      <label class="light" for="under_18">Under 18</label>
+        <label class="" for="email">Email</label>
+        <input type="email" name="email" value="">
 
-      <input type="radio" name="age" value="over_18">
-      <label class="light" for="over_18">Over 18</label>
+        <label class="" for="logi">Login</label>
+        <input type="text" name="login" value="" required>
+
+      <label>Płeć:</label>
+      <input type="radio" name="plec" value="under_18">
+      <label class="light" for="kobieta">Kobieta</label>
+
+      <input type="radio" name="plec" value="over_18">
+      <label class="light" for="mezczyzna">Mężczyzna</label>
 
     </fieldset>
     <fieldset>
-        <legend><span class="section">2</span> Your Profile </legend>
-        <label class="" for="bio">Bio:</label>
-        <textarea name="bio"></textarea>
+       
     </fieldset>
     <button type="submit">Sing up</button>
 </form>
