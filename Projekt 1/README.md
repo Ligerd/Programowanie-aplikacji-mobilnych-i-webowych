@@ -1,6 +1,6 @@
-# PAMIW backend
+# Instrukcja
 
-## Docker Compose
+## Postawienie serwera
 
 Build Image
 ```
