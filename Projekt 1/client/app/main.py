@@ -1,10 +1,18 @@
 from flask import Flask
-from flask import render_template
+from flask import render_template,redirect, request
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/',methods=["GET"])
 def index():
+    return render_template('login.html')
+
+@app.route('/upload-file',methods=['GET'])
+def upload():
+    return render_template('uploadfile.html')
+
+@app.route('/rejestracja',methods=['GET'])
+def rejestracja():
     return render_template('rejestracja.html')
 
 if __name__ == '__main__':

@@ -1,15 +1,11 @@
-from flask import Flask, Blueprint, request, Response, jsonify
-
+from flask import Flask, Blueprint, request, Response, jsonify,redirect
+from flask import render_template
+import os
 app = Flask(__name__)
-
-# Index
-#@app.route('/', methods=['GET'])
-#def app_index():
-#    return 'PAMIW >> Hello World'
 
 @app.route('/', methods=['GET'])
 def home():
-    return 'PAMIW >> Hello World'
+    return render_template("uploadfile.html")
 
 @app.after_request
 def after_request(response):
@@ -20,11 +16,39 @@ def after_request(response):
 
 @app.route('/login',methods=['POST'])
 def logint():
-	login=request.form['login']
-	baza="karolik"
-	if login==baza:
-		return jsonify({'error' : 'Ten login już został wybrany przez innego użytkownika. Proszę o wybranie innego loginu.'})
-	return jsonify({'answer': 'Okej'})
+    login=request.form['login']
+    baza="karolik"
+    if login==baza:
+        return jsonify({'error' : 'Ten login już został wybrany przez innego użytkownika. Proszę o wybranie innego loginu.'})
+    return jsonify({'answer': 'Okej'})
+
+
+@app.route('/singin',methods=['POST'])
+def singin():
+    bazadanych={
+        "Jan" : 12345,
+        "Jacek" : 11111,
+        "Bartek" : 22222
+    }
+    login=request.form['name']
+    print(type(login))
+    password=request.form['password']
+    if str(login) in bazadanych:
+        if bazadanych[login]==int(password):
+            return redirect('http://localhost:3001/upload-file')
+        else:
+            return jsonify({'error': ' Worng password'})
+    else:
+        return jsonify({'error': ' Użytkownika z takim loginem nie ma w bazie'})
+
+@app.route("/upload-image",methods=["GET","POST"])
+def upload_image():
+    if request.method=="POST":
+        if request.files:
+            image=request.files["pdf"]
+            print(image)
+            return redirect(request.url)
+    return redirect('http://localhost:3001/upload-file')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
