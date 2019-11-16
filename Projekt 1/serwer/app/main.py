@@ -3,6 +3,8 @@ from flask import render_template
 import os
 import sys
 import redis
+import hashlib
+
 
 app = Flask(__name__)
 db = redis.Redis(host='redis', port=6379, decode_responses=True)
@@ -46,11 +48,11 @@ def singin():
     password = request.form["password"]
     if lg in bazadanych:
         if bazadanych[lg] == int(password):
-            return redirect(url_for("show_articles"))
+            return redirect("http://localhost:3001/upload-file")
         else:
             return redirect(request.url)
 
-        
+
 app.config["IMAGE_UPLOADS"]="static/img"
 app.config["ALLOWED_FORMAT"]=["PDF"]
 
@@ -75,8 +77,6 @@ def save_file(file_to_save):
         filename_prefix = str(db.incr(FILE_COUNTER))
         new_filename = filename_prefix + file_to_save.filename
         path_to_file = DIR_PATH + new_filename
-        file_to_save.save(path_to_file)
-
         db.hset(new_filename, ORG_FILENAME, file_to_save.filename)
         db.hset(new_filename, PATH_TO_FILE, path_to_file)
         db.hset(FILENAMES, new_filename, file_to_save.filename)
