@@ -1,11 +1,23 @@
-from flask import Flask, Blueprint, request, Response, jsonify,redirect
+from flask import session, Flask, Blueprint, request, Response, jsonify,redirect, g , url_for
 from flask import render_template
 import os
-app = Flask(__name__)
+import sys
+import redis
 
-@app.route('/', methods=['GET'])
-def home():
-    return render_template("uploadfile.html")
+app = Flask(__name__)
+db = redis.Redis(host='redis', port=6379, decode_responses=True)
+
+DIR_PATH = "files/"
+FILE_COUNTER = "file_counter"
+ORG_FILENAME = "org_filename"
+NEW_FILENAME = "new_filename"
+PATH_TO_FILE = "path_to_file"
+FILENAMES = "filenames"
+
+@app.route('/')
+def show_articles():
+    files = db.hvals(FILENAMES)
+    return render_template("uploadfileSerwer.html", my_files = files)
 
 @app.after_request
 def after_request(response):
@@ -23,34 +35,29 @@ def logint():
     return jsonify({'answer': 'Okej'})
 
 
-@app.route('/singin',methods=['POST'])
+@app.route('/singin',methods=['POST','GET'])
 def singin():
-    bazadanych={
-        "Jan" : 12345,
-        "Jacek" : 11111,
-        "Bartek" : 22222
+    bazadanych = {
+        "Jan": 12345,
+        "Jacek": 11111,
+        "Bartek": 22222
     }
-    login=request.form['name']
-    print(type(login))
-    password=request.form['password']
-    if str(login) in bazadanych:
-        if bazadanych[login]==int(password):
-            return redirect('http://localhost:3001/upload-file')
+    lg=request.form["name"]
+    password = request.form["password"]
+    if lg in bazadanych:
+        if bazadanych[lg] == int(password):
+            return redirect(url_for("show_articles"))
         else:
-            return jsonify({'error': ' Worng password'})
-    else:
-        return jsonify({'error': ' Użytkownika z takim loginem nie ma w bazie'})
+            return redirect(request.url)
 
-
+        
 app.config["IMAGE_UPLOADS"]="static/img"
 app.config["ALLOWED_FORMAT"]=["PDF"]
 
 def check_file(filename):
     if not "." in filename:
         return False
-
     ext=filename.rsplit(".",1)[1]
-
     if ext.upper() in app.config["ALLOWED_FORMAT"]:
         return True
     else:
@@ -59,13 +66,22 @@ def check_file(filename):
 @app.route("/upload-image",methods=["GET","POST"])
 def upload_image():
     if request.method=="POST":
-        if request.files:
-            image=request.files["pdf"]
-            if not check_file(image.filename):
-                return redirect(request.url)
-            image.save(os.path.join(app.config["IMAGE_UPLOADS"],image.filename))
-            return redirect(request.url)
-    return redirect('http://localhost:3001/upload-file')
+        f = request.files["pdf"]
+        save_file(f)
+        return redirect(url_for("show_articles"))
+
+def save_file(file_to_save):
+    if(len(file_to_save.filename) > 0):
+        filename_prefix = str(db.incr(FILE_COUNTER))
+        new_filename = filename_prefix + file_to_save.filename
+        path_to_file = DIR_PATH + new_filename
+        file_to_save.save(path_to_file)
+
+        db.hset(new_filename, ORG_FILENAME, file_to_save.filename)
+        db.hset(new_filename, PATH_TO_FILE, path_to_file)
+        db.hset(FILENAMES, new_filename, file_to_save.filename)
+    else:
+        print("\n\t\t[WARN] Empty content of file\n", file = sys.stderr)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
