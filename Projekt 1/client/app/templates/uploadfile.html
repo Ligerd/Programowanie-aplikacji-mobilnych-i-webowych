@@ -8,6 +8,7 @@
     <link href="http://fonts.googleapis.com/css?family=Nunito:400,300" rel="stylesheet" type="text/css">
 </head>
 <body>
+<section>
 <form action="http://localhost:3000/upload-image" method="POST" enctype="multipart/form-data">
     <h1>Upload form</h1>
     <div class="form-group">
@@ -19,5 +20,11 @@
     </div>
         <button type="submit" class="btn btn-primary"> Upload file</button>
 </form>
+   <ul>
+                {% for file in files %}
+                <li>{{ file }}</li>
+                {% endfor %}
+   </ul>
+</section>
 </body>
 </html>
