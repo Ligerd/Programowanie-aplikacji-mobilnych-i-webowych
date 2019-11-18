@@ -2,7 +2,7 @@ $(document).ready(function () {
         $("#login").blur(function () {
         $.ajax({
             type : 'POST',
-            url : 'http://localhost:3000/login',
+            url : 'http://localhost:3000/rejestracja',
             data :{
                 login : $("#login").val()
             }
