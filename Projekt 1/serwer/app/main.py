@@ -1,4 +1,4 @@
-from flask import session, Flask, Blueprint, request, Response, jsonify,redirect, g , url_for, make_response
+from flask import  Flask, request, jsonify,redirect, url_for, make_response , abort
 from flask import render_template
 import os
 import sys
@@ -8,11 +8,14 @@ import hashlib
 POST = "POST"
 GET = "GET"
 SESSION_ID = "session-id"
-
+INVALIDATE = -1
 app = Flask(__name__)
+
 db = redis.Redis(host='redis', port=6379, decode_responses=True)
 db.flushdb()
+
 bazadanych = {'admin': 1}
+
 DIR_PATH = "files/"
 FILE_COUNTER = "file_counter"
 ORG_FILENAME = "org_filename"
@@ -33,24 +36,20 @@ def after_request(response):
   response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
   return response
 
-@app.route('/rejestracja',methods=['POST'])
+@app.route('/rejestracja',methods=['POST','GET'])
 def logint():
-    login=request.form['login']
-    password=int(request.form['password'])
-    baza="karolik"
-    if login==baza:
-        return jsonify({'error' : 'Ten login już został wybrany przez innego użytkownika. Proszę o wybranie innego loginu.'})
+    login=request.form['login'].rstrip()
+    password=int(request.form['password'].rstrip())
     bazadanych[login]=password
-    print("login ",login)
-    print("hasło ",password)
+    print(bazadanych)
     return redirect("http://localhost:3001/login")
 
 
 @app.route('/singin',methods=['POST','GET'])
 def singin():
-    lg=request.form["name"]
-    password = request.form["password"]
-    if lg in bazadanych:
+    lg=request.form["name"].rstrip()
+    password = request.form["password"].rstrip()
+    if lg in bazadanych.keys():
         if bazadanych[lg] == int(password):
             name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
             db.set(SESSION_ID, name_hash)
@@ -82,7 +81,13 @@ def upload_image():
             save_file(f)
             return redirect(url_for("show_articles"))
         else:
-            print("nie ma cookie")
+            print("trudno")
+@app.route('/logout')
+def logout():
+  response = redirect("http://localhost:3001/login")
+  response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
+  db.delete(SESSION_ID)
+  return response
 
 def save_file(file_to_save):
     if(len(file_to_save.filename) > 0):
