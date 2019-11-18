@@ -44,6 +44,7 @@ def logint():
 
 @app.route('/singin',methods=['POST','GET'])
 def singin():
+    print("HELLO`1")
     bazadanych = {
         "Jan": 12345,
         "Jacek": 11111,
@@ -54,13 +55,15 @@ def singin():
     if lg in bazadanych:
         if bazadanych[lg] == int(password):
             name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
+            print("HELLO")
             db.set(SESSION_ID, name_hash)
             response = make_response(render_template("uploadfileSerwer.html"))
             response.set_cookie(SESSION_ID, name_hash, max_age=30, secure=True, httponly=True)
             return response
-
+        else:
+            return redirect("http://localhost:3001/")
     else:
-            return redirect(request.url)
+            return redirect("http://localhost:3001/")
 
 
 app.config["IMAGE_UPLOADS"]="static/img"
@@ -70,7 +73,11 @@ app.config["ALLOWED_FORMAT"]=["PDF"]
 def upload_image():
     if request.method=="POST":
         name_hash=request.cookies.get(SESSION_ID)
-        dbname_hash=db.get("SESSION_ID")
+        print("hash")
+        print(name_hash)
+        dbname_hash=db.get("session-id")
+        print("hello")
+        print(dbname_hash)
         if(name_hash==dbname_hash):
             f = request.files["pdf"]
             save_file(f)
