@@ -15,5 +15,9 @@ def upload():
 def rejestracja():
     return render_template('login.html')
 
+@app.route('/wrong',methods=['GET'])
+def wrong():
+    return render_template('error.html')
+
 if __name__ == '__main__':
     app.run(debug=True)

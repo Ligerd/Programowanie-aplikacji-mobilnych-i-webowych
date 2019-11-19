@@ -26,6 +26,9 @@ FILENAMES = "filenames"
 @app.route('/')
 def show_articles():
     files = db.hvals(FILENAMES)
+    #response = make_response('', 303)
+    #response.headers["Location"] = "http://localhost:3001/upload-file"
+    #response
     response = redirect("http://localhost:3001/upload-file")
     #response.data=files
     return response
@@ -87,7 +90,7 @@ def upload_image():
             save_file(f)
             return redirect(url_for("show_articles"))
         else:
-            print("trudno")
+            return redirect("http://localhost:3001/wrong")
 @app.route('/logout')
 def logout():
   response = redirect("http://localhost:3001/login")
