@@ -26,8 +26,11 @@ FILENAMES = "filenames"
 @app.route('/')
 def show_articles():
     files = db.hvals(FILENAMES)
+    response = redirect("http://localhost:3001/upload-file")
+    #response.data=files
+    return response
     #return redirect(url_for("http://localhost:3001/upload-file", my_files=files))
-    return render_template("uploadfileSerwer.html", my_files = files)
+    #return render_template("uploadfileSerwer.html", my_files = files)
 
 @app.after_request
 def after_request(response):
@@ -39,7 +42,7 @@ def after_request(response):
 @app.route('/rejestracja',methods=['POST','GET'])
 def logint():
     login=request.form['login'].rstrip()
-    password=int(request.form['password'].rstrip())
+    password=request.form['password'].rstrip()
     bazadanych[login]=password
     print(bazadanych)
     return redirect("http://localhost:3001/login")
@@ -50,13 +53,16 @@ def singin():
     lg=request.form["name"].rstrip()
     password = request.form["password"].rstrip()
     if lg in bazadanych.keys():
-        if bazadanych[lg] == int(password):
+        print("login zgadza się")
+        if bazadanych[lg] == password:
+            print("hsało")
             name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
             db.set(SESSION_ID, name_hash)
             response = make_response('', 303)
             #response.set_cookie(SESSION_ID, name_hash, max_age=3000, secure=True, httponly=True)
             response.set_cookie(SESSION_ID, name_hash, max_age=3000)
-            response.headers["Location"] = "/upload-image"
+            response.headers["Location"] = "http://localhost:3001/upload-file"
+            #response=redirect("http://localhost:3001/upload-image")
             return response
         else:
             return redirect("http://localhost:3001/login")
@@ -70,7 +76,7 @@ app.config["ALLOWED_FORMAT"]=["PDF"]
 @app.route("/upload-image",methods=["GET","POST"])
 def upload_image():
     if request.method=="GET":
-        return render_template("uploadfileSerwer.html")
+        return redirect("http://localhost:3001/upload-file")
     if request.method=="POST":
         name_hash=request.cookies.get(SESSION_ID)
         print("ZE STRONY UPLOADU",name_hash)
@@ -94,6 +100,7 @@ def save_file(file_to_save):
         filename_prefix = str(db.incr(FILE_COUNTER))
         new_filename = filename_prefix + file_to_save.filename
         path_to_file = DIR_PATH + new_filename
+        file_to_save.save(path_to_file)
         db.hset(new_filename, ORG_FILENAME, file_to_save.filename)
         db.hset(new_filename, PATH_TO_FILE, path_to_file)
         db.hset(FILENAMES, new_filename, file_to_save.filename)

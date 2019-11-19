@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template
+from flask import render_template,request
 
 app = Flask(__name__)
 
@@ -9,7 +9,7 @@ def index():
 
 @app.route('/upload-file',methods=['GET'])
 def upload():
-    return render_template('uploadfile.html')
+    return render_template('uploadfile.html',my_file=request.data)
 
 @app.route('/login',methods=['GET'])
 def rejestracja():
