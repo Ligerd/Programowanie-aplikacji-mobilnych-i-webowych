@@ -4,6 +4,7 @@ import os
 import sys
 import redis
 import hashlib
+import json
 
 POST = "POST"
 GET = "GET"
@@ -26,14 +27,14 @@ FILENAMES = "filenames"
 @app.route('/')
 def show_articles():
     files = db.hvals(FILENAMES)
-    #response = make_response('', 303)
-    #response.headers["Location"] = "http://localhost:3001/upload-file"
-    #response
-    response = redirect("http://localhost:3001/upload-file")
-    #response.data=files
+    files = ["fsda","fsasa","fsaf"]
+    response = make_response('', 303)
+    response = jsonify(file=files)
+    response.headers['Location'] = "http://localhost:3001/upload-file"
+    response.headers['Content-type'] = 'application/json'
+    response.autocorrect_location_header = False
     return response
-    #return redirect(url_for("http://localhost:3001/upload-file", my_files=files))
-    #return render_template("uploadfileSerwer.html", my_files = files)
+
 
 @app.after_request
 def after_request(response):
@@ -63,7 +64,7 @@ def singin():
             db.set(SESSION_ID, name_hash)
             response = make_response('', 303)
             #response.set_cookie(SESSION_ID, name_hash, max_age=3000, secure=True, httponly=True)
-            response.set_cookie(SESSION_ID, name_hash, max_age=3000)
+            response.set_cookie(SESSION_ID, name_hash, max_age=120)
             response.headers["Location"] = "http://localhost:3001/upload-file"
             #response=redirect("http://localhost:3001/upload-image")
             return response
@@ -90,7 +91,11 @@ def upload_image():
             save_file(f)
             return redirect(url_for("show_articles"))
         else:
-            return redirect("http://localhost:3001/wrong")
+            response = redirect("http://localhost:3001/error")
+            response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
+            db.delete(SESSION_ID)
+            return response
+
 @app.route('/logout')
 def logout():
   response = redirect("http://localhost:3001/login")
