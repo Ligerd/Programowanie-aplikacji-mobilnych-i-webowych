@@ -63,7 +63,7 @@ def singin():
             db.set(SESSION_ID, name_hash)
             response = make_response('', 303)
             #response.set_cookie(SESSION_ID, name_hash, max_age=3000, secure=True, httponly=True)
-            response.set_cookie(SESSION_ID, name_hash, max_age=3000)
+            response.set_cookie(SESSION_ID, name_hash, max_age=180)
             response.headers["Location"] = "http://localhost:3001/upload-file"
             #response=redirect("http://localhost:3001/upload-image")
             return response
@@ -90,7 +90,10 @@ def upload_image():
             save_file(f)
             return redirect(url_for("show_articles"))
         else:
-            return redirect("http://localhost:3001/wrong")
+            response = redirect("http://localhost:3001/error")
+            response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
+            db.delete(SESSION_ID)
+            return response
 @app.route('/logout')
 def logout():
   response = redirect("http://localhost:3001/login")
