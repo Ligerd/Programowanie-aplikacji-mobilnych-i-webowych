@@ -1,8 +1,5 @@
 from flask import Flask
-from flask import render_template, request
-import json
-
-
+from flask import render_template,request
 
 app = Flask(__name__)
 
@@ -12,15 +9,13 @@ def index():
 
 @app.route('/upload-file',methods=['GET'])
 def upload():
-    #, files=request.get_json()
-    #,files=request.get_json().get('file')
-    return render_template('uploadfile.html')
+    return render_template('uploadfile.html',my_file=request.data)
 
 @app.route('/login',methods=['GET'])
 def rejestracja():
     return render_template('login.html')
 
-@app.route('/error',methods=['GET'])
+@app.route('/wrong',methods=['GET'])
 def wrong():
     return render_template('error.html')
 
