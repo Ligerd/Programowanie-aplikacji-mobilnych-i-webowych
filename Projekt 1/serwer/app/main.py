@@ -23,17 +23,12 @@ NEW_FILENAME = "new_filename"
 PATH_TO_FILE = "path_to_file"
 FILENAMES = "filenames"
 
-@app.route('/')
+@app.route('/files')
 def show_articles():
     files = db.hvals(FILENAMES)
-    #response = make_response('', 303)
-    #response.headers["Location"] = "http://localhost:3001/upload-file"
-    #response
-    response = redirect("http://localhost:3001/upload-file")
-    #response.data=files
+    response=jsonify(my_files=files)
     return response
-    #return redirect(url_for("http://localhost:3001/upload-file", my_files=files))
-    #return render_template("uploadfileSerwer.html", my_files = files)
+
 
 @app.after_request
 def after_request(response):
@@ -53,23 +48,22 @@ def logint():
 
 @app.route('/singin',methods=['POST','GET'])
 def singin():
-    lg=request.form["name"].rstrip()
-    password = request.form["password"].rstrip()
-    if lg in bazadanych.keys():
-        print("login zgadza się")
-        if bazadanych[lg] == password:
-            print("hsało")
-            name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
-            db.set(SESSION_ID, name_hash)
-            response = make_response('', 303)
-            #response.set_cookie(SESSION_ID, name_hash, max_age=3000, secure=True, httponly=True)
-            response.set_cookie(SESSION_ID, name_hash, max_age=180)
-            response.headers["Location"] = "http://localhost:3001/upload-file"
-            #response=redirect("http://localhost:3001/upload-image")
-            return response
+    if request.method == "POST":
+        lg=request.form["name"].rstrip()
+        password = request.form["password"].rstrip()
+        if lg in bazadanych.keys():
+            print("login zgadza się")
+            if bazadanych[lg] == password:
+                print("hsało")
+                name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
+                db.set(SESSION_ID, name_hash)
+                response = make_response('', 303)
+                response.set_cookie(SESSION_ID, name_hash, max_age=180)
+                response.headers["Location"] = "http://localhost:3001/upload-file"
+                return response
+            else:
+                return redirect("http://localhost:3001/login")
         else:
-            return redirect("http://localhost:3001/login")
-    else:
             return redirect("http://localhost:3001/login")
 
 
@@ -88,12 +82,14 @@ def upload_image():
         if(name_hash==dbname_hash):
             f = request.files["pdf"]
             save_file(f)
-            return redirect(url_for("show_articles"))
+            return redirect("http://localhost:3001/upload-file")
         else:
             response = redirect("http://localhost:3001/error")
             response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
             db.delete(SESSION_ID)
             return response
+
+
 @app.route('/logout')
 def logout():
   response = redirect("http://localhost:3001/login")

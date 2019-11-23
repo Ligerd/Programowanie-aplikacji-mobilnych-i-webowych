@@ -6,6 +6,7 @@
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link href="http://fonts.googleapis.com/css?family=Nunito:400,300" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="{{ url_for('static', filename='script_upload.js') }}"></script>
 </head>
 <body>
 <section>
@@ -19,13 +20,14 @@
        </div>
     </div>
         <button type="submit" class="btn btn-primary"> Upload file</button>
+    <button type="button" id="refresh" name="refresh">refresh</button>
     <a href="http://localhost:3000/logout" id="logout"> Logout</a>
 </form>
-   <ul>
-                {% for file in files %}
-                <li>{{ file }}</li>
-                {% endfor %}
-   </ul>
+<div id="myList">
+<ul id="lista">
+
+</ul>
+</div>
 </section>
 </body>
 </html>
