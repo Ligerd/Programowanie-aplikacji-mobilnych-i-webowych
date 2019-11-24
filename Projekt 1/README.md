@@ -1,5 +1,5 @@
 # Instrukcja
-Proszę o zklonowanie repozytorium.
+Proszę o sklonowanie repozytorium.
 ## Postawienie aplikacji
 Aby postawić aplikację proszę o uruchomienie skryptu o nazwie up.sh. Za pomocą polecenia:
 ```
