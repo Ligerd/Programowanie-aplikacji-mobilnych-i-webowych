@@ -5,15 +5,15 @@ app = Flask(__name__)
 
 @app.route('/',methods=["GET"])
 def index():
-    return render_template('rejestracja.html')
+    return render_template('login.html')
 
 @app.route('/upload-file',methods=['GET'])
 def upload():
     return render_template('uploadfile.html')
 
-@app.route('/login',methods=['GET'])
+@app.route('/rejestracja',methods=['GET'])
 def rejestracja():
-    return render_template('login.html')
+    return render_template('rejestracja.html')
 
 @app.route('/error',methods=['GET'])
 def wrong():

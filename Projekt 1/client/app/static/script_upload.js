@@ -12,8 +12,14 @@ $(document).ready(function () {
                    document.getElementById('myList').appendChild(ul);
                    data['my_files'].forEach(function(name){
 			        var li = document.createElement('li');
+			        var a=document.createElement('a');
+			        var v="http://localhost:3000/download/"+name;
+			        console.log(v);
+			        a.setAttribute("href",v);
+			        li.appendChild(a);
+			        a.innerHTML += name;
 			        ul.appendChild(li);
-			        li.innerHTML += name;
+			        //li.innerHTML += name;
                 });
 
             },
