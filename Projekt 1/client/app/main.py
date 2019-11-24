@@ -7,6 +7,10 @@ app = Flask(__name__)
 def index():
     return render_template('login.html')
 
+@app.route('/format_error',methods=["GET"])
+def format_error():
+    return render_template('format_error.html')
+
 @app.route('/upload-file',methods=['GET'])
 def upload():
     if request.cookies.get(SESSION_ID)==None:

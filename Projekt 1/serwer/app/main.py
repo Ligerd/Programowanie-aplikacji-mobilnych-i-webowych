@@ -81,8 +81,17 @@ def singin():
             return redirect("http://localhost:3001/")
 
 
-app.config["IMAGE_UPLOADS"]="static/img"
+
 app.config["ALLOWED_FORMAT"]=["PDF"]
+
+def allowed_image(filename):
+    if not "." in filename:
+        return False
+    ext=filename.rsplit(".",1)[1]
+    if ext.upper() in app.config["ALLOWED_FORMAT"]:
+        return True
+    else:
+        return False
 
 @app.route("/upload-image",methods=["GET","POST"])
 def upload_image():
@@ -98,10 +107,11 @@ def upload_image():
             return response
         if(name_hash==dbname_hash):
             f = request.files["pdf"]
-            if(f==None):
+            if allowed_image(f):
+                save_file(f)
                 return redirect("http://localhost:3001/upload-file")
-            save_file(f)
-            return redirect("http://localhost:3001/upload-file")
+            else:
+                return redirect("http://localhost:3001/format_error")
         else:
             response = redirect("http://localhost:3001/error")
             response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
