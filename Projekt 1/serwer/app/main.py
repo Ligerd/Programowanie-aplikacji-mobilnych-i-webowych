@@ -58,7 +58,7 @@ def singin():
                 name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
                 db.set(SESSION_ID, name_hash)
                 response = make_response('', 303)
-                response.set_cookie(SESSION_ID, name_hash, max_age=180)
+                response.set_cookie(SESSION_ID, name_hash, max_age=60)
                 response.headers["Location"] = "http://localhost:3001/upload-file"
                 return response
             else:
@@ -72,13 +72,16 @@ app.config["ALLOWED_FORMAT"]=["PDF"]
 
 @app.route("/upload-image",methods=["GET","POST"])
 def upload_image():
-    if request.method=="GET":
-        return redirect("http://localhost:3001/upload-file")
     if request.method=="POST":
         name_hash=request.cookies.get(SESSION_ID)
-        print("ZE STRONY UPLOADU",name_hash)
+        #print("ZE STRONY UPLOADU",name_hash)
         dbname_hash=db.get(SESSION_ID)
-        print("database hash",dbname_hash)
+        #print("database hash",dbname_hash)
+        if (request.cookies.get(SESSION_ID)==None):
+            response = redirect("http://localhost:3001/error")
+            response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
+            db.delete(SESSION_ID)
+            return response
         if(name_hash==dbname_hash):
             f = request.files["pdf"]
             save_file(f)
