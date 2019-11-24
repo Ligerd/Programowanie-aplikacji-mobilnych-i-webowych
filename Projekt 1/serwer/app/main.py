@@ -1,6 +1,5 @@
-from flask import  Flask, request, jsonify,redirect, url_for, make_response , abort,send_file
-from flask import render_template
-import os
+from flask import  Flask, request, jsonify,redirect, make_response ,send_file
+
 import sys
 import redis
 import hashlib
@@ -9,6 +8,7 @@ POST = "POST"
 GET = "GET"
 SESSION_ID = "session-id"
 INVALIDATE = -1
+
 app = Flask(__name__)
 
 db = redis.Redis(host='redis', port=6379, decode_responses=True)
@@ -23,6 +23,7 @@ NEW_FILENAME = "new_filename"
 PATH_TO_FILE = "path_to_file"
 FILENAMES = "filenames"
 FILENAMESDATABASE="filenamesDATABASE"
+
 @app.route('/files')
 def show_articles():
     files = db.hvals(FILENAMES)
@@ -61,6 +62,7 @@ def logint():
 @app.route('/singin',methods=['POST','GET'])
 def singin():
     if request.method == "POST":
+        print("FSAFASFASFAS")
         lg=request.form["name"].rstrip()
         password = request.form["password"].rstrip()
         if lg in bazadanych.keys():
@@ -70,7 +72,7 @@ def singin():
                 name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
                 db.set(SESSION_ID, name_hash)
                 response = make_response('', 303)
-                response.set_cookie(SESSION_ID, name_hash, max_age=60)
+                response.set_cookie(SESSION_ID, name_hash, max_age=180)
                 response.headers["Location"] = "http://localhost:3001/upload-file"
                 return response
             else:

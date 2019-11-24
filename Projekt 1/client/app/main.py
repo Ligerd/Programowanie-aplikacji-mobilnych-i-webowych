@@ -1,6 +1,6 @@
 from flask import Flask
-from flask import render_template
-
+from flask import render_template,request,redirect
+SESSION_ID = "session-id"
 app = Flask(__name__)
 
 @app.route('/',methods=["GET"])
@@ -9,6 +9,8 @@ def index():
 
 @app.route('/upload-file',methods=['GET'])
 def upload():
+    if request.cookies.get(SESSION_ID)==None:
+        return redirect("/")
     return render_template('uploadfile.html')
 
 @app.route('/rejestracja',methods=['GET'])
