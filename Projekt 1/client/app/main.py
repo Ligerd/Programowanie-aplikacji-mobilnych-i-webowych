@@ -10,7 +10,7 @@ def index():
 @app.route('/upload-file',methods=['GET'])
 def upload():
     if request.cookies.get(SESSION_ID)==None:
-        return redirect("/")
+        return redirect("/error")
     return render_template('uploadfile.html')
 
 @app.route('/rejestracja',methods=['GET'])

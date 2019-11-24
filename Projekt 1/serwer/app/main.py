@@ -63,7 +63,7 @@ def logint():
 def singin():
     if request.method == "POST":
         print("FSAFASFASFAS")
-        lg=request.form["name"].rstrip()
+        lg=request.form["login"].rstrip()
         password = request.form["password"].rstrip()
         if lg in bazadanych.keys():
             print("login zgadza się")

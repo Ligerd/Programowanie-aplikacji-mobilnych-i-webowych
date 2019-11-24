@@ -14,6 +14,8 @@ Jako admina dodałem użytkowanika o następującym loginie i hasłe:
 Login: admin
 Hasło: admin
 ```
+## Rejestracja
+Aby zarejestrować się wystarczy podać login i hasło oraz nacisnąc przycisk zarejestrów.
 ## Wyłączenie aplikacji
 Aby aby wyłączyć aplikację proszę o uruhomienie skryptu o nazwie down.sh.  Za pomocą polecenia:
 ```
