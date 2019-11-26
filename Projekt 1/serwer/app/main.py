@@ -114,7 +114,7 @@ def upload_image():
                 return redirect("http://localhost:3001/format_error")
         else:
             response = redirect("http://localhost:3001/error")
-            response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
+            response.set_cookie(SESSION_ID, "INVALIDATE", max_age=INVALIDATE)
             db.delete(SESSION_ID)
             return response
 
