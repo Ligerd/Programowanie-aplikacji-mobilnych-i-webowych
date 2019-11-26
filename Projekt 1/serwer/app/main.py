@@ -122,7 +122,7 @@ def upload_image():
 @app.route('/logout')
 def logout():
   response = redirect("http://localhost:3001/")
-  response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
+  response.set_cookie(SESSION_ID, "INVALIDATE", max_age=INVALIDATE)
   db.delete(SESSION_ID)
   return response
 
