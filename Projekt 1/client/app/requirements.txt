@@ -1,1 +1,6 @@
 flask
+uuid
+pyjwt
+redis
+requests
+flask-swagger-ui

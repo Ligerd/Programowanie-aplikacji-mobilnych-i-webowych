@@ -1,20 +1,21 @@
 from flask import  Flask, request, jsonify,redirect, make_response ,send_file
 
-import sys
+import sys, os
 import redis
-import hashlib
 
-POST = "POST"
-GET = "GET"
+from jwt import decode, InvalidTokenError
+from uuid import uuid4
+from flask import Flask
+from flask import request
+
+JWT_SECRET="HELLO"
 SESSION_ID = "session-id"
-INVALIDATE = -1
 
 app = Flask(__name__)
 
-db = redis.Redis(host='redis', port=6379, decode_responses=True)
+db = redis.Redis(host='serwer_redis', port=6380, decode_responses=True)
 db.flushdb()
 
-bazadanych = {'admin': "admin"}
 
 DIR_PATH = "files/"
 FILE_COUNTER = "file_counter"
@@ -24,13 +25,50 @@ PATH_TO_FILE = "path_to_file"
 FILENAMES = "filenames"
 FILENAMESDATABASE="filenamesDATABASE"
 
+PORT = int(os.environ.get("PORT", 5000))
+print(PORT)
+
+@app.route('/')
+def index():
+    return "OK!"
+
 @app.route('/files')
 def show_articles():
     files = db.hvals(FILENAMES)
     response=jsonify(my_files=files)
     return response
 
-@app.route("/download/<string:name>", methods=["GET"])
+
+@app.route('/download/<fid>')
+def download(fid):
+    token = request.headers.get('token') or request.args.get('token')
+    if len(fid) == 0:
+        return '<h1>CDN</h1> Missing fid', 404
+    if token is None:
+        return '<h1>CDN</h1> No token', 401
+    if not valid(token):
+        return '<h1>CDN</h1> Invalid token', 401
+    payload = decode(token, JWT_SECRET)
+    if payload.get('fid', fid) != fid:
+        return '<h1>CDN</h1> Incorrect token payload', 401
+
+  #content_type = request.headers.get('Accept') or request.args.get('content_type')
+  #with open('/tmp/' + fid, 'rb') as f:
+  #  d = f.read()
+  #  response = make_response(d, 200)
+  #  response.headers['Content-Type'] = content_type
+  #  return response
+    article_hash = db.hget(fid,FILENAMESDATABASE)
+    full_name = db.hget(article_hash, PATH_TO_FILE)
+    org_filename = db.hget(article_hash, ORG_FILENAME)
+    if (full_name != None):
+        try:
+            return send_file(full_name, attachment_filename=org_filename)
+        except Exception as e:
+            print(e, file=sys.stderr)
+
+    return org_filename, 200
+'''
 def download_article(name):
     article_hash=db.hget(name,FILENAMESDATABASE)
     full_name = db.hget(article_hash, PATH_TO_FILE)
@@ -42,43 +80,13 @@ def download_article(name):
             print(e, file = sys.stderr)
 
     return org_filename, 200
-
+'''
 @app.after_request
 def after_request(response):
-  response.headers.add('Access-Control-Allow-Origin', '*')
-  response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-  response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-  return response
-
-@app.route('/rejestracja',methods=['POST','GET'])
-def logint():
-    login=request.form['login'].rstrip()
-    password=request.form['password'].rstrip()
-    bazadanych[login]=password
-    print(bazadanych)
-    return redirect("http://localhost:3001/")
-
-
-@app.route('/singin',methods=['POST','GET'])
-def singin():
-    if request.method == "POST":
-        print("FSAFASFASFAS")
-        lg=request.form["login"].rstrip()
-        password = request.form["password"].rstrip()
-        if lg in bazadanych.keys():
-            print("login zgadza się")
-            if bazadanych[lg] == password:
-                print("hsało")
-                name_hash = hashlib.sha512(lg.encode("utf-8")).hexdigest()
-                db.set(SESSION_ID, name_hash)
-                response = make_response('', 303)
-                response.set_cookie(SESSION_ID, name_hash, max_age=180)
-                response.headers["Location"] = "http://localhost:3001/upload-file"
-                return response
-            else:
-                return redirect("http://localhost:3001/")
-        else:
-            return redirect("http://localhost:3001/")
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 
 
@@ -93,40 +101,31 @@ def allowed_image(filename):
     else:
         return False
 
-@app.route("/upload-image",methods=["GET","POST"])
+@app.route("/upload",methods=["POST"])
 def upload_image():
-    if request.method=="POST":
-        name_hash=request.cookies.get(SESSION_ID)
-        #print("ZE STRONY UPLOADU",name_hash)
-        dbname_hash=db.get(SESSION_ID)
-        #print("database hash",dbname_hash)
-        if (request.cookies.get(SESSION_ID)==None):
-            response = redirect("http://localhost:3001/error")
-            response.set_cookie("session_id", "INVALIDATE", max_age=INVALIDATE)
-            db.delete(SESSION_ID)
-            return response
-        if(name_hash==dbname_hash):
-            f = request.files["pdf"]
-            if allowed_image(f):
-                save_file(f)
-                return redirect("http://localhost:3001/upload-file")
-            else:
-                return redirect("http://localhost:3001/format_error")
-        else:
-            response = redirect("http://localhost:3001/error")
-            response.set_cookie(SESSION_ID, "INVALIDATE", max_age=INVALIDATE)
-            db.delete(SESSION_ID)
-            return response
+    f = request.files.get('file')
+    t = request.form.get('token')
+    c = request.form.get('callback')
+    print(c," ", t)
+    if f is None:
+        return redirect(f"{c}?error=No+file+provided") if c \
+            else ('<h1>CDN</h1> No file provided', 400)
+    if t is None:
+        return redirect(f"{c}?error=No+token+provided") if c \
+            else ('<h1>CDN</h1> No token provided', 401)
+    if not valid(t):
+        return redirect(f"{c}?error=Invalid+token") if c \
+            else ('<h1>CDN</h1> Invalid token', 401)
+    if not allowed_image(f.filename):
+        return redirect(f"{c}?error=Invalid format file")
+    fid, content_type = str(uuid4()), f.content_type
+    save_file(f,fid)
+    return redirect(f"{c}?fid={fid}&content_type={content_type}&namefile={f.filename}") if c \
+        else (f'<h1>CDN</h1> Uploaded {fid}', 200)
 
 
-@app.route('/logout')
-def logout():
-  response = redirect("http://localhost:3001/")
-  response.set_cookie(SESSION_ID, "INVALIDATE", max_age=INVALIDATE)
-  db.delete(SESSION_ID)
-  return response
 
-def save_file(file_to_save):
+def save_file(file_to_save,fid):
     if(len(file_to_save.filename) > 0):
         filename_prefix = str(db.incr(FILE_COUNTER))
         new_filename = filename_prefix + file_to_save.filename
@@ -137,11 +136,16 @@ def save_file(file_to_save):
         db.hset(new_filename, ORG_FILENAME, file_to_save.filename)
         db.hset(new_filename, PATH_TO_FILE, path_to_file)
         db.hset(FILENAMES, new_filename, file_to_save.filename)
-        db.hset(file_to_save.filename, FILENAMESDATABASE, new_filename)
+        db.hset(fid,FILENAMESDATABASE, new_filename)
         print("FILENAMES:",db.hvals(FILENAMES))
         print(db.hvals(new_filename))
     else:
         print("\n\t\t[WARN] Empty content of file\n", file = sys.stderr)
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+def valid(token):
+  try:
+    decode(token, JWT_SECRET)
+  except InvalidTokenError as e:
+    app.logger.error(str(e))
+    return False
+  return True
