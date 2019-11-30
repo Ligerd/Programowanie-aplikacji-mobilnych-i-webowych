@@ -5,6 +5,7 @@ from uuid import uuid4
 from flask import Flask
 from flask import request
 from flask import make_response
+from flask import send_from_directory
 from flask_swagger_ui import get_swaggerui_blueprint
 
 import redis
@@ -12,6 +13,7 @@ import datetime
 import requests
 
 app = Flask(__name__)
+
 
 db = redis.Redis(host='client_redis', port=6381, decode_responses=True)
 
@@ -28,9 +30,25 @@ USERLOGIN="userlogin"
 USERPASSWORD="userpassword"
 USER='user'
 FILENAMES="filenames"
-users=[]
-#db.hset(USERLOGIN,"admin","admin")
-#db.hset(USERPASSWORD,"admin","admin")
+
+db.set("users:"+"admin","admin")
+
+
+SWAGGER_URL = '/swagger'
+API_URL = '/static/swagger.json'
+SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Seans-Python-Flask-REST-Boilerplate"
+    }
+)
+
+app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
+
+@app.route('/swagger')
+def swagger():
+    return "/static/swagger.json"
 
 @app.route('/')
 def index():
@@ -38,7 +56,6 @@ def index():
 
 @app.route('/auth', methods=['POST'])
 def auth():
-    print("USERS",users)
     response = make_response('', 303)
     login = request.form.get('login')
     password = request.form.get('password')
@@ -133,9 +150,7 @@ def wrong():
 
 @app.route('/logout')
 def logout():
-    user=findCorrectUserByID(request.cookies.get())
     response = make_response('', 303)
-    db.hdel(user,SESSION_ID)
     response.set_cookie(SESSION_ID, "INVALIDATE", max_age=INVALIDATE)
     response.headers["Location"] = "/"
     return response
