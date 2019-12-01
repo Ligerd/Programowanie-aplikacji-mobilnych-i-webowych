@@ -21,3 +21,7 @@ Jako admin w aplikacji jest dodany użytkownika o następującym loginie i hasle
 Login: admin
 Hasło: admin
 ```
+## Swagger
+```
+http://localhost:3001/swagger
+```
