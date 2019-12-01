@@ -1,15 +1,34 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "description": "sean",
     "version": "1.0.0",
-    "title": "Seans-Python3-Flask-Rest-Boilerplate",
+    "title": "Aplikacja do logowania Flaks Redis",
     "contact": {
-      "email": "seanwasere@gmail.com"
+      "email": "aleksandrkorolik@gmail.com"
+    }
+  },
+  "serves": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [{
+    "name":"Login aplication"
+  }],
+  "paths": {
+    "/auth": {
+      "post": {
+        "tags": [
+          "Login aplication"
+        ]
+      }
     },
-    "license": {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
+    "/logaut": {
+      "get": {
+        "tags": [
+          "Login aplication"
+        ]
+      }
     }
   }
 }
