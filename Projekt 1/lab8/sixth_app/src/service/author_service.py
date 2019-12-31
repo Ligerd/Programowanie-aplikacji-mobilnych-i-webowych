@@ -22,6 +22,7 @@ class AuthorService:
 
     def get_author_by_id(self, author_id):
         app.logger.debug("Getting author by id: {0}.".format(author_id))
+
         author = self.author_repo.find_by_id(author_id)
 
         if author == None:

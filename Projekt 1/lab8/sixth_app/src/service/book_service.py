@@ -10,9 +10,15 @@ class BookService:
     def __init__(self):
         self.book_repo = BookRepository()
 
-    def add_book(self, book_req,file):
+    def add_file_to_book(self, id,file):
         app.logger.debug("Adding book...")
-        book_id = self.book_repo.save(book_req,file)
+        book_id = self.book_repo.save_file(id,file)
+        app.logger.debug("Added book (id: {0})".format(book_id))
+        return book_id
+
+    def add_book(self, book_req):
+        app.logger.debug("Adding book...")
+        book_id = self.book_repo.save(book_req)
         app.logger.debug("Added book (id: {0})".format(book_id))
         return book_id
 
@@ -38,11 +44,11 @@ class BookService:
 
 
     def get_book_by_id(self, book_id):
-        app.logger.debug("Getting author by id: {0}.".format(book_id))
-        author = self.book_repo.find_by_id(book_id)
+        app.logger.debug("Getting book by id: {0}.".format(book_id))
+        book = self.book_repo.find_by_id(book_id)
 
-        if author == None:
-            raise BookNotFoundByIdException("Not found author by id: {0}".format(book_id))
+        if book == None:
+            raise BookNotFoundByIdException("Not found book by id: {0}".format(book_id))
 
         app.logger.debug("Got author by id: {0}".format(book_id))
-        return author
+        return book

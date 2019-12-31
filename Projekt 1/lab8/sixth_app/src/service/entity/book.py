@@ -1,7 +1,7 @@
 import json
 
 class Book:
-    def __init__(self, id, author_id, title, year,filename,filepath):
+    def __init__(self, id, author_id, title, year,filename=None,filepath=None):
         self.id = id
         self.author_id = author_id
         self.title = title

@@ -57,7 +57,6 @@ class AuthorList(Resource):
     @api_app.doc(responses = {200: "OK"})
     def get(self):
         paginated_autor_response = self.author_service.get_paginated_authors_response()
-
         return paginated_autor_response
 
     def parse_request_arg_or_zero(self, request, param, default_value):
@@ -174,7 +173,7 @@ class BookList(Resource):
         val = request.args.get(param, default_value)
         val = int(val) if val.isdigit() else 0
         return val
-
+    '''
     @api_app.expect(new_book_model)
     def post(self):
         try:
@@ -199,3 +198,83 @@ class BookList(Resource):
 
         except AuthorNotFoundByIdException as e:
             book_namespace.abort(404, e.__doc__, status = "Could not save new book. Author (by id) does not exist.", statusCode = "404")
+    '''
+    @api_app.expect(new_book_model)
+    def post(self):
+        try:
+            book_req = BookRequest(request)
+            app.logger.debug("id author: {0}".format(book_req.author_id))
+            app.logger.debug("title: {0}".format(book_req.title))
+            app.logger.debug("year: {0}".format(book_req.year))
+            author = self.author_service.get_author_by_id(book_req.author_id)
+            saved_book_id = self.book_service.add_book(book_req)
+
+            result = {"message": "Added new book", "saved_book_id": saved_book_id}
+
+            return result
+
+        except KeyError as e:
+            book_namespace.abort(400, e.__doc__, status="Could not save new book", statusCode="400")
+
+        except BookAlreadyExistsException as e:
+            book_namespace.abort(409, e.__doc__, status="Could not save new book. Already exists", statusCode="409")
+
+        except AuthorNotFoundByIdException as e:
+            book_namespace.abort(404, e.__doc__, status="Could not save new book. Author (by id) does not exist.", statusCode="404")
+
+@book_namespace.route("/file/<int:id>")
+class BookFile(Resource):
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.book_service = BookService()
+
+    @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
+            params = {"id": "Specify book Id"})
+
+
+    def post(self, id):
+        try:
+            id= request.form.get('book_id')
+            file=request.files.get('file')
+            saved_book_id = self.book_service.add_file_to_book(id,file)
+
+            result = {"message": "Added new book", "saved_book_id": saved_book_id}
+
+            return result
+
+        except KeyError as e:
+            book_namespace.abort(400, e.__doc__, status="Could not save new book", statusCode="400")
+
+        except BookAlreadyExistsException as e:
+            book_namespace.abort(409, e.__doc__, status="Could not save new book. Already exists", statusCode="409")
+
+        except AuthorNotFoundByIdException as e:
+            book_namespace.abort(404, e.__doc__, status="Could not save new book. Author (by id) does not exist.", statusCode="404")
+
+
+    def get(self, id):
+        try:
+            book=self.book_service.get_book_by_id(id)
+            result={
+                    "message": "Found book by id: {0}".format(id),
+                    "author_id": book.author_id,
+                    "title": book.title,
+                    "year": book.year
+            }
+            return result
+
+        except Exception as e:
+            book_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
+
+    @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
+            params = {"id": "Specify book Id to remove"})
+    def delete(self, id):
+        try:
+            self.book_service.delete_book(id)
+            return {
+                    "message": "Removed book by id: {0}".format(id)
+            }
+
+        except Exception as e:
+            book_namespace.abort(400, e.__doc__, status = "Could not remove book by id", statusCode = "400")

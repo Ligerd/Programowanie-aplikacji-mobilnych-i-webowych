@@ -17,28 +17,42 @@ class BookRepository:
         if self.db.get(BOOK_COUNTER) == None:
             self.db.set(BOOK_COUNTER, 0)
 
-    def save(self, book_req,file):
-        app.logger.debug("Saving new book: {0}.".format(book_req))
+    def save_file(self, id,file):
+        app.logger.debug("Saving file to book with id: {0}.".format(id))
 
-        #book = self.find_book_by_title(book_req.title)
-        app.logger.debug("DUPA")
-
-        #if book != None:
-        #    raise BookAlreadyExistsException("Book title \"{0}\" already exist.".format(book_req.title))
+        book = self.find_by_id(id)
 
 
-        id=self.db.incr(BOOK_COUNTER)
+        if book != None:
+            raise BookAlreadyExistsException("File to Book id \"{0}\" already exist.".format(id))
+
+
+
         newfilename=str(id)+file.filename
         path_to_file=DIR_PATH+newfilename
-        book = Book(id, book_req.author_id, book_req.title, book_req.year,file.filename,path_to_file)
 
+        book.filename=file.filename
+        book.filepath=path_to_file
         app.logger.debug("after creating book")
 
-        book_id = BOOK_ID_PREFIX + str(book.id)
+        file.save(path_to_file)
 
+
+        app.logger.debug("Saved new book: (id: {0}).".format(book.id))
+        return book.id
+
+    def save(self, book_req):
+        app.logger.debug("Saving new book: {0}.".format(book_req))
+        book = self.find_book_by_title(book_req.title)
+
+        if book != None:
+            raise BookAlreadyExistsException("Book title \"{0}\" already exist.".format(book_req.title))
+
+        book = Book(self.db.incr(BOOK_COUNTER), book_req.author_id, book_req.title, book_req.year)
+
+        book_id = BOOK_ID_PREFIX + str(book.id)
         book_json = json.dumps(book.__dict__)
 
-        file.save(path_to_file)
         self.db.set(book_id, book_json)
 
         app.logger.debug("Saved new book: (id: {0}).".format(book.id))
