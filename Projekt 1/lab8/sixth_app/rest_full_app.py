@@ -4,7 +4,7 @@ from src.dto.request.book_request import BookRequest
 from src.dto.request.author_request import AuthorRequest
 from src.service.book_service import BookService
 from src.service.author_service import AuthorService
-from src.exception.exception import BookAlreadyExistsException, AuthorAlreadyExistsException, AuthorNotFoundByIdException
+from src.exception.exception import BookAlreadyExistsException, AuthorAlreadyExistsException, AuthorNotFoundByIdException, BookAlreadyHaveFileExeption
 
 app = Flask(__name__)
 api_app = Api(app = app, version = "0.1", title = "Sixth app API", description = "REST-full API for library")
@@ -12,7 +12,7 @@ api_app = Api(app = app, version = "0.1", title = "Sixth app API", description =
 hello_namespace = api_app.namespace("hello", description = "Info API")
 author_namespace = api_app.namespace("author", description = "Author API")
 book_namespace = api_app.namespace("book", description = "Book API")
-
+file_namespace = api_app.namespace("file", description = "File API")
 START = "start"
 LIMIT = "limit"
 
@@ -222,7 +222,7 @@ class BookList(Resource):
         except AuthorNotFoundByIdException as e:
             book_namespace.abort(404, e.__doc__, status="Could not save new book. Author (by id) does not exist.", statusCode="404")
 
-@book_namespace.route("/file/<int:id>")
+@file_namespace.route("/<int:id>")
 class BookFile(Resource):
 
     def __init__(self, args):
@@ -230,51 +230,48 @@ class BookFile(Resource):
         self.book_service = BookService()
 
     @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
-            params = {"id": "Specify book Id"})
+            params = {"id": "Specify book Id for which you want to add a file"})
 
 
     def post(self, id):
         try:
             id= request.form.get('book_id')
             file=request.files.get('file')
+            app.logger.debug("ID: {0}.".format(file.filename))
             saved_book_id = self.book_service.add_file_to_book(id,file)
 
-            result = {"message": "Added new book", "saved_book_id": saved_book_id}
+            result = {"message": "Added new file to book", "book_id": saved_book_id}
 
             return result
 
         except KeyError as e:
-            book_namespace.abort(400, e.__doc__, status="Could not save new book", statusCode="400")
+            book_namespace.abort(400, e.__doc__, status="Could not save new file", statusCode="400")
 
-        except BookAlreadyExistsException as e:
-            book_namespace.abort(409, e.__doc__, status="Could not save new book. Already exists", statusCode="409")
-
-        except AuthorNotFoundByIdException as e:
-            book_namespace.abort(404, e.__doc__, status="Could not save new book. Author (by id) does not exist.", statusCode="404")
+        except BookAlreadyHaveFileExeption as e:
+            book_namespace.abort(409, e.__doc__, status="Could not save new file to book. File already exists", statusCode="409")
 
 
+
+    @api_app.doc(responses={200: "OK", 400: "Invalid argument"},
+                 params={"id": "Specify book Id"})
     def get(self, id):
         try:
-            book=self.book_service.get_book_by_id(id)
-            result={
-                    "message": "Found book by id: {0}".format(id),
-                    "author_id": book.author_id,
-                    "title": book.title,
-                    "year": book.year
-            }
-            return result
+            self.book_service.get_book_file(id)
 
         except Exception as e:
             book_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
 
+
+
+
     @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
-            params = {"id": "Specify book Id to remove"})
+            params = {"id": "Specify book Id for which you want delete the file"})
     def delete(self, id):
         try:
-            self.book_service.delete_book(id)
+            self.book_service.delete_file_to_book(id)
             return {
-                    "message": "Removed book by id: {0}".format(id)
+                    "message": "Removed file to book with id: {0}".format(id)
             }
 
         except Exception as e:
-            book_namespace.abort(400, e.__doc__, status = "Could not remove book by id", statusCode = "400")
+            book_namespace.abort(400, e.__doc__, status = "Could not remove file for book with id", statusCode = "400")

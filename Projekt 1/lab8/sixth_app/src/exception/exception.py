@@ -9,3 +9,6 @@ class AuthorNotFoundByIdException(Exception):
 
 class BookNotFoundByIdException(Exception):
     pass
+
+class BookAlreadyHaveFileExeption(Exception):
+    pass

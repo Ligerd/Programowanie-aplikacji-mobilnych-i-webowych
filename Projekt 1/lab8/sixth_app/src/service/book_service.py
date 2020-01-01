@@ -25,6 +25,11 @@ class BookService:
     def delete_book(self,id):
         self.book_repo.delete(id)
 
+    def delete_file_to_book(self,id):
+        self.book_repo.delete_file(id)
+
+    def get_book_file(self,id):
+        self.book_repo.download_file(id)
 
     def clear_author_books(self,author_id):
         app.logger.debug("START DELETE BOOKS FOR AUTHOR_ID")

@@ -1,10 +1,10 @@
 from flask import Flask
 import redis
 import json
-
+import os
 from ...service.entity.book import Book
 from ...exception.exception import BookAlreadyExistsException
-
+from ...exception.exception import BookAlreadyHaveFileExeption
 app = Flask(__name__)
 
 BOOK_COUNTER = "book_counter"
@@ -22,9 +22,9 @@ class BookRepository:
 
         book = self.find_by_id(id)
 
-
-        if book != None:
-            raise BookAlreadyExistsException("File to Book id \"{0}\" already exist.".format(id))
+        app.logger.debug("Saving file to book with id: {0}.".format(book.id))
+        if book.filename != None:
+            raise BookAlreadyHaveFileExeption("File to Book id \"{0}\" already exist.".format(id))
 
 
 
@@ -37,8 +37,12 @@ class BookRepository:
 
         file.save(path_to_file)
 
+        book_id = BOOK_ID_PREFIX + str(book.id)
+        book_json = json.dumps(book.__dict__)
 
-        app.logger.debug("Saved new book: (id: {0}).".format(book.id))
+        self.db.set(book_id, book_json)
+
+        app.logger.debug("Saved new file to book: (id: {0}).".format(book.id))
         return book.id
 
     def save(self, book_req):
@@ -61,6 +65,24 @@ class BookRepository:
     def delete(self,id):
         self.db.delete(BOOK_ID_PREFIX+str(id))
         return "OK"
+
+    def delete_file(self,id):
+        app.logger.debug("Delete file to book with id: {0}.".format(id))
+        book=self.find_by_id(id)
+
+        filename=str(book.id)+book.filename
+        filepath=book.filepath
+        os.remove(filepath)
+        book.filename=None
+        book.filepath=None
+
+        book_id = BOOK_ID_PREFIX + str(book.id)
+        book_json = json.dumps(book.__dict__)
+        self.db.set(book_id, book_json)
+
+    def download_file(self,id):
+        return True
+
 
     def find_book_by_title(self, title):
         n = int(self.db.get(BOOK_COUNTER))
@@ -91,7 +113,7 @@ class BookRepository:
             book_json = self.db.get(book_id)
             book = Book.from_json(json.loads(book_json))
 
-            if book.id == book_id_to_find:
+            if book.id == int(book_id_to_find):
                 return book
 
         return None
