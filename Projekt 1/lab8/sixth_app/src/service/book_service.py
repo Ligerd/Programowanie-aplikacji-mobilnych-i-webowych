@@ -23,13 +23,26 @@ class BookService:
         return book_id
 
     def delete_book(self,id):
+        book = self.book_repo.find_by_id(id)
+
+        if book == None:
+            raise BookNotFoundByIdException("Not found book by id: {0}".format(id))
         self.book_repo.delete(id)
 
     def delete_file_to_book(self,id):
+        book = self.book_repo.find_by_id(id)
+
+        if book.filename == None:
+            raise BookNotFoundByIdException("Book with id {0} don't have file".format(id))
         self.book_repo.delete_file(id)
 
     def get_book_file(self,id):
         app.logger.debug("GET FILE")
+        book = self.book_repo.find_by_id(id)
+
+        if book.filename == None:
+            raise BookNotFoundByIdException("Book with id {0} don't have file".format(id))
+        
         return self.book_repo.download_file(id)
 
     def clear_author_books(self,author_id):

@@ -6,6 +6,7 @@ import base64
 from ...service.entity.book import Book
 from ...exception.exception import BookAlreadyExistsException
 from ...exception.exception import BookAlreadyHaveFileExeption
+from ...exception.exception import BookNotFoundByIdException
 app = Flask(__name__)
 
 BOOK_COUNTER = "book_counter"
