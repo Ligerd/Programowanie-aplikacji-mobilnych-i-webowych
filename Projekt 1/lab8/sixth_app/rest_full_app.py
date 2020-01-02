@@ -173,32 +173,7 @@ class BookList(Resource):
         val = request.args.get(param, default_value)
         val = int(val) if val.isdigit() else 0
         return val
-    '''
-    @api_app.expect(new_book_model)
-    def post(self):
-        try:
-            book_req = BookRequest(request)
-            app.logger.debug("ID: {0}.".format(type(book_req.author_id)))
-            app.logger.debug("ID: {0}.".format(book_req.title))
-            app.logger.debug("ID: {0}.".format(book_req.year))
-            file=request.files.get('file')
-            app.logger.debug("ID: {0}.".format(file.filename))
-            author = self.author_service.get_author_by_id(int(book_req.author_id))
-            saved_book_id = self.book_service.add_book(book_req,file)
 
-            result = {"message": "Added new book", "saved_book_id": saved_book_id}
-
-            return result
-
-        except KeyError as e:
-            book_namespace.abort(400, e.__doc__, status = "Could not save new book", statusCode = "400")
-
-        except BookAlreadyExistsException as e:
-            book_namespace.abort(409, e.__doc__, status = "Could not save new book. Already exists", statusCode = "409")
-
-        except AuthorNotFoundByIdException as e:
-            book_namespace.abort(404, e.__doc__, status = "Could not save new book. Author (by id) does not exist.", statusCode = "404")
-    '''
     @api_app.expect(new_book_model)
     def post(self):
         try:
@@ -229,10 +204,19 @@ class BookFile(Resource):
         super().__init__(args)
         self.book_service = BookService()
 
+    new_file_book_model = api_app.model("File model",
+                                        {
+
+                                            "book_id": fields.Integer(required=True, description="Book's Id ",
+                                                                      help="Book's Id cannot be null"),
+                                            "file": fields.String(required=True, description="Attachment file",
+                                                                  help="Title cannot be null"),
+                                        })
+
+
     @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
             params = {"id": "Specify book Id for which you want to add a file"})
-
-
+    @api_app.expect(new_file_book_model)
     def post(self, id):
         try:
             id= request.form.get('book_id')
