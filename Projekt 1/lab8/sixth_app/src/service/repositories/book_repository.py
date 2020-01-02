@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, send_file, make_response
 import redis
 import json
 import os
+import base64
 from ...service.entity.book import Book
 from ...exception.exception import BookAlreadyExistsException
 from ...exception.exception import BookAlreadyHaveFileExeption
@@ -81,8 +82,16 @@ class BookRepository:
         self.db.set(book_id, book_json)
 
     def download_file(self,id):
-        return True
-
+        book=self.find_by_id(id)
+        full_name=book.filepath
+        org_filename=book.filename
+        image_binary = open(full_name, "rb")
+        encoded_string = base64.b64encode(image_binary.read())
+        response = make_response(encoded_string)
+        response.headers.set('Content-Type', 'application/pdf')
+        response.headers.set('Content-Disposition', 'attachment', filename=org_filename)
+        app.logger.debug("after response")
+        return response
 
     def find_book_by_title(self, title):
         n = int(self.db.get(BOOK_COUNTER))

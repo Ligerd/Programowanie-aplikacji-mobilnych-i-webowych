@@ -255,8 +255,9 @@ class BookFile(Resource):
     @api_app.doc(responses={200: "OK", 400: "Invalid argument"},
                  params={"id": "Specify book Id"})
     def get(self, id):
+        app.logger.debug("GETTING FILE")
         try:
-            self.book_service.get_book_file(id)
+            return self.book_service.get_book_file(id)
 
         except Exception as e:
             book_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
