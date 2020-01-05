@@ -72,20 +72,6 @@ def auth():
         response.headers["Location"] = "/"
     return response
 
-def findCorrectUserByLogin(login):
-    for user in users:
-        logindb=db.hget(user,USERLOGIN)
-        if logindb==login:
-            return user
-    return None
-
-def findCorrectUserByID(id):
-    for user in users:
-        iddb=db.hget(user,SESSION_ID)
-        if iddb==id:
-            return user
-    return None
-
 @app.route('/format_error',methods=["GET"])
 def format_error():
     return render_template('format_error.html',WEB_HOST=WEB_HOST)
@@ -134,14 +120,10 @@ def rejestracja():
 
 @app.route('/userRegistration',methods=['POST'])
 def userRegistration():
-    #user_prefix = str(db.incr(USER_COUNTER))
-    #new_user = user_prefix + USER
-    #users.append(new_user)
+
     login=request.form['login'].rstrip()
     password=request.form['password'].rstrip()
     db.set("users:"+login,password)
-    #db.hset(new_user,USERPASSWORD,password)
-    print("HELLO")
     return redirect("/")
 
 @app.route('/error',methods=['GET'])

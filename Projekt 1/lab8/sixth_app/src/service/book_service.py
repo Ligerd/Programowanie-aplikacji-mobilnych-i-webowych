@@ -42,7 +42,7 @@ class BookService:
 
         if book.filename == None:
             raise BookNotFoundByIdException("Book with id {0} don't have file".format(id))
-        
+
         return self.book_repo.download_file(id)
 
     def clear_author_books(self,author_id):

@@ -4,3 +4,7 @@ pyjwt
 redis
 requests
 flask-swagger-ui
+python-dotenv
+python-jose
+flask-cors
+six
