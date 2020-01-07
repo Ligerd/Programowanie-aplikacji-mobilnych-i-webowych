@@ -12,3 +12,6 @@ class BookNotFoundByIdException(Exception):
 
 class BookAlreadyHaveFileExeption(Exception):
     pass
+
+class BookDoNotHaveFileExeption(Exception):
+    pass

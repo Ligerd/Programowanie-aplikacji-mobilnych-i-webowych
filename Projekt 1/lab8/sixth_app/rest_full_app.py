@@ -4,7 +4,7 @@ from src.dto.request.book_request import BookRequest
 from src.dto.request.author_request import AuthorRequest
 from src.service.book_service import BookService
 from src.service.author_service import AuthorService
-from src.exception.exception import BookAlreadyExistsException, AuthorAlreadyExistsException, AuthorNotFoundByIdException, BookAlreadyHaveFileExeption
+from src.exception.exception import BookDoNotHaveFileExeption, BookAlreadyExistsException, AuthorAlreadyExistsException, AuthorNotFoundByIdException, BookAlreadyHaveFileExeption
 
 app = Flask(__name__)
 api_app = Api(app = app, version = "0.1", title = "Sixth app API", description = "REST-full API for library")
@@ -229,10 +229,10 @@ class BookFile(Resource):
             return result
 
         except KeyError as e:
-            book_namespace.abort(400, e.__doc__, status="Could not save new file", statusCode="400")
+            file_namespace.abort(400, e.__doc__, status="Could not save new file", statusCode="400")
 
         except BookAlreadyHaveFileExeption as e:
-            book_namespace.abort(409, e.__doc__, status="Could not save new file to book. File already exists", statusCode="409")
+            file_namespace.abort(409, e.__doc__, status="Could not save new file to book. File already exists", statusCode="409")
 
 
 
@@ -243,10 +243,11 @@ class BookFile(Resource):
         try:
             return self.book_service.get_book_file(id)
 
+        except BookDoNotHaveFileExeption as e:
+            file_namespace.abort(400, e.__doc__, status="Could not find file for book",
+                                 statusCode="400")
         except Exception as e:
-            book_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
-
-
+            file_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
 
 
     @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
@@ -259,4 +260,4 @@ class BookFile(Resource):
             }
 
         except Exception as e:
-            book_namespace.abort(400, e.__doc__, status = "Could not remove file for book with id", statusCode = "400")
+            file_namespace.abort(400, e.__doc__, status = "Could not remove file for book with id", statusCode = "400")

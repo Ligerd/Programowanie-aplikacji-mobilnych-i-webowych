@@ -17,8 +17,8 @@ class AuthorService:
 
     def delete_author_by_id(self,author_id):
         app.logger.debug("START DELETE AUTHOR in service")
+        author=self.get_author_by_id(author_id)
         self.author_repo.delete(author_id)
-        return True
 
     def get_author_by_id(self, author_id):
         app.logger.debug("Getting author by id: {0}.".format(author_id))

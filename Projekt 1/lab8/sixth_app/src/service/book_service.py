@@ -1,7 +1,7 @@
 from flask import Flask
 from src.service.repositories.book_repository import BookRepository
 from src.dto.response.paginated_book_response import PaginatedBookResponse
-from src.exception.exception import BookNotFoundByIdException
+from src.exception.exception import BookNotFoundByIdException,BookDoNotHaveFileExeption
 
 app = Flask(__name__)
 
@@ -39,9 +39,10 @@ class BookService:
     def get_book_file(self,id):
         app.logger.debug("GET FILE")
         book = self.book_repo.find_by_id(id)
-
+        if book==None:
+            raise BookNotFoundByIdException("Not found book by id: {0}".format(id))
         if book.filename == None:
-            raise BookNotFoundByIdException("Book with id {0} don't have file".format(id))
+           raise BookDoNotHaveFileExeption("Book with id {0} don't have file".format(id))
 
         return self.book_repo.download_file(id)
 
