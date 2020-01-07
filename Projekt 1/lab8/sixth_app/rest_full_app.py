@@ -4,10 +4,10 @@ from src.dto.request.book_request import BookRequest
 from src.dto.request.author_request import AuthorRequest
 from src.service.book_service import BookService
 from src.service.author_service import AuthorService
-from src.exception.exception import BookDoNotHaveFileExeption, BookAlreadyExistsException, AuthorAlreadyExistsException, AuthorNotFoundByIdException, BookAlreadyHaveFileExeption
+from src.exception.exception import BookNotFoundByIdException ,BookDoNotHaveFileExeption, BookAlreadyExistsException, AuthorAlreadyExistsException, AuthorNotFoundByIdException, BookAlreadyHaveFileExeption
 
 app = Flask(__name__)
-api_app = Api(app = app, version = "0.1", title = "Sixth app API", description = "REST-full API for library")
+api_app = Api(app = app, version = "0.1", title = "Network Service", description = "REST-full API for library")
 
 hello_namespace = api_app.namespace("hello", description = "Info API")
 author_namespace = api_app.namespace("author", description = "Author API")
@@ -40,6 +40,7 @@ class AuthorList(Resource):
             })
 
     @api_app.expect(new_author_model)
+    @api_app.doc(responses={200: "OK", 409: "Autor already exists"})
     def post(self):
         try:
             author_req = AuthorRequest(request)
@@ -86,7 +87,7 @@ class Author(Resource):
             return result
 
         except Exception as e:
-            book_namespace.abort(400, e.__doc__, status = "Could not find author by id", statusCode = "400")
+            author_namespace.abort(400, e.__doc__, status = "Could not find author by id", statusCode = "400")
 
     @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
             params = {"id": "Specify author Id to remove"})
@@ -100,7 +101,7 @@ class Author(Resource):
             }
 
         except Exception as e:
-            book_namespace.abort(400, e.__doc__, status = "Could not remove author by id", statusCode = "400")
+            author_namespace.abort(400, e.__doc__, status = "Could not remove author by id", statusCode = "400")
 
 
 
@@ -175,6 +176,7 @@ class BookList(Resource):
         return val
 
     @api_app.expect(new_book_model)
+    @api_app.doc(responses={200: "OK", 400: "Invalid argument",409 :"Book already exists",404:"Author (by id) does not exist."})
     def post(self):
         try:
             book_req = BookRequest(request)
@@ -214,7 +216,7 @@ class BookFile(Resource):
                                         })
 
 
-    @api_app.doc(responses = {200: "OK", 400: "Invalid argument"},
+    @api_app.doc(responses = {200: "OK", 400: "Invalid argument",409:"Book already have file"},
             params = {"id": "Specify book Id for which you want to add a file"})
     @api_app.expect(new_file_book_model)
     def post(self, id):
@@ -234,6 +236,8 @@ class BookFile(Resource):
         except BookAlreadyHaveFileExeption as e:
             file_namespace.abort(409, e.__doc__, status="Could not save new file to book. File already exists", statusCode="409")
 
+        except BookNotFoundByIdException as e:
+            book_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
 
 
     @api_app.doc(responses={200: "OK", 400: "Invalid argument"},
@@ -259,5 +263,7 @@ class BookFile(Resource):
                     "message": "Removed file to book with id: {0}".format(id)
             }
 
+        except BookNotFoundByIdException as e:
+            book_namespace.abort(400, e.__doc__, status = "Could not find book by id", statusCode = "400")
         except Exception as e:
             file_namespace.abort(400, e.__doc__, status = "Could not remove file for book with id", statusCode = "400")

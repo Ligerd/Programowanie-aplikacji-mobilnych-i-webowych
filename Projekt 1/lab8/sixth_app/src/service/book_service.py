@@ -12,6 +12,7 @@ class BookService:
 
     def add_file_to_book(self, id,file):
         app.logger.debug("Adding book...")
+        book=self.get_book_by_id(id)
         book_id = self.book_repo.save_file(id,file)
         app.logger.debug("Added book (id: {0})".format(book_id))
         return book_id
