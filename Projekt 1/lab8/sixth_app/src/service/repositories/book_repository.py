@@ -88,7 +88,8 @@ class BookRepository:
         org_filename=book.filename
         image_binary = open(full_name, "rb")
         encoded_string = base64.b64encode(image_binary.read())
-        response = make_response(encoded_string)
+        decoded_string = base64.b64decode(encoded_string)
+        response = make_response(decoded_string)
         response.headers.set('Content-Type', 'application/pdf')
         response.headers.set('Content-Disposition', 'attachment', filename=org_filename)
         app.logger.debug("after response")
