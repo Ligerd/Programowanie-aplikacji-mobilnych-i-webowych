@@ -17,7 +17,16 @@
         <input type="password" id="password" name="password" value="">
 
     <button type="submit" id="singin">Sing up</button>
-    <a href="{{WEB_HOST}}/rejestracja" id="registration"> Registration</a>
+    <form>
+    </form>
+     <form action="{{WEB_HOST}}/auth0_login">
+    <button type="submit">Log In by auth0</button>
+    </form>
+
+    <form action="{{WEB_HOST}}/rejestracja">
+    <button type="submit">Registration</button>
+    </form>
+
 </form>
 </body>
 </html>
